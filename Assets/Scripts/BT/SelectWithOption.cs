@@ -2,15 +2,13 @@
 
 namespace AI
 {
-    public abstract class SelectWithOption : Node
+    public abstract class SelectWithOption : Selector
     {
         [SerializeField]
         private Group successTree;
 
         [SerializeField]
         private Group failTree;
-
-        public abstract bool Check();
 
         public override void Execute()
         {

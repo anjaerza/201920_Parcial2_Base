@@ -1,6 +1,6 @@
 ﻿using AI;
 
-public class IsTaggedActorNear : Selector
+public class IsTaggedActorNear : SelectWithOption
 {
     protected override bool Check()
     {

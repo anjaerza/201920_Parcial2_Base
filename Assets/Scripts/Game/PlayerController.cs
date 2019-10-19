@@ -1,21 +1,35 @@
 ﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
+using AI;
 
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(Collider))]
 public abstract class PlayerController : MonoBehaviour
 {
     [SerializeField]
-    private float stopTime = 3F;
+    private float stopTime = 43F;
 
-    protected NavMeshAgent agent { get; set; }
+    private bool hasFastRun=false;
+    private bool hasCoat = false;
 
-    public bool IsTagged { get; protected set; }
+    private bool isInteractable = true;
+
+    public NavMeshAgent agent { get; set; }
+
+    public bool IsTagged { get; set; }
+    public bool IsInteractable { get => isInteractable; set => isInteractable = value; }
+    public bool HasFastRun { get => hasFastRun; set => hasFastRun = value; }
+    public bool HasCoat { get => hasCoat; set => hasCoat = value; }
 
     public void SwitchRoles()
     {
         IsTagged = !IsTagged;
+
+        if (IsTagged)
+        {
+            GameController.taggedScore[name] += 1;
+        }
 
         // Pause all logic and restart after
     }
@@ -28,27 +42,56 @@ public abstract class PlayerController : MonoBehaviour
     public virtual IEnumerator StopLogic()
     {
         // Stop BT runner if AI player, else stop movement.
+        isInteractable = false;
 
-        yield return new WaitForSeconds(stopTime);
+        gameObject.GetComponent<BehaviourRunner>().enabled = false;
+
+        gameObject.GetComponent<NavMeshAgent>().isStopped = true;
         
+        yield return new WaitForSeconds(stopTime);
+
+        gameObject.GetComponent<NavMeshAgent>().isStopped = false;
+        gameObject.GetComponent<BehaviourRunner>().enabled = true;
+        isInteractable = true;
+
+
+
         // Restart stuff.
     }
 
     protected abstract Vector3 GetLocation();
 
     // Start is called before the first frame update
-    private void Start()
+    public void Start()
     {
         agent = GetComponent<NavMeshAgent>();
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-        SwitchRoles();
-
-        if (IsTagged)
+        if (IsInteractable)
         {
-            StopLogic(); 
+            IsTagged = !IsTagged;
+
+            if (IsTagged)
+            {
+                StopLogic();
+            }
+        }
+
+
+         
+    }
+
+    private void Update()
+    {
+        if (Input.GetMouseButtonDown(0))
+
+        {
+            if (GetComponent<HumanController>())
+            {
+                agent.SetDestination(GetComponent<HumanController>().GetLocation());
+            }
         }
     }
 }

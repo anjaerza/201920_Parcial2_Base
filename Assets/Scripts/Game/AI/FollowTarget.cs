@@ -1,9 +1,12 @@
 ﻿using AI;
+using UnityEngine;
 
 public class FollowTarget : Node
 {
+    [SerializeField] GameObject objetivo;
     public override void Execute()
     {
-        throw new System.NotImplementedException();
+        objetivo = GetComponent<GetNearestTarget>().Target;
+        GetComponent<PlayerController>().GoToLocation(objetivo.transform.position);
     }
 }
